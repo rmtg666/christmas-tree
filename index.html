@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merry Christmas!</title>
+    <style>
+        /* 引入优雅的字体 */
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Noto+Sans+SC&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #0f0c29; /* fallback for old browsers */
+            background: -webkit-linear-gradient(to top, #24243e, #302b63, #0f0c29);
+            background: linear-gradient(to top, #24243e, #302b63, #0f0c29);
+        }
+
+        /* --- 欢迎页 --- */
+        #welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            position: absolute;
+            z-index: 100;
+            background: inherit;
+            transition: opacity 1s ease-out;
+        }
+
+        #welcome-screen h1 {
+            font-family: 'Dancing Script', cursive;
+            color: #fff;
+            font-size: 4rem;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+        }
+
+        #welcome-screen input {
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50px;
+            background: transparent;
+            color: #fff;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #welcome-screen input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #welcome-screen input:focus {
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        
+        #welcome-screen p {
+            color: #ffc107;
+            margin-top: 10px;
+            visibility: hidden;
+        }
+
+        /* --- 主场景 --- */
+        #main-scene {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease-in;
+        }
+
+        /* --- 雪花效果 --- */
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            from { transform: translateY(0vh) translateX(0vw); }
+            to { transform: translateY(105vh) translateX(5vw); }
+        }
+
+        /* --- 圣诞树 --- */
+        .christmas-tree {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50vmin;
+            height: 70vmin;
+        }
+
+        .tree-part {
+            position: absolute;
+            background: #2c6b2f;
+            border-bottom-left-radius: 50%;
+            border-bottom-right-radius: 50%;
+        }
+
+        .tree-part.top { width: 30%; height: 30%; left: 35%; top: 0; transform: scale(1, 1.5); }
+        .tree-part.middle { width: 60%; height: 50%; left: 20%; top: 15%; transform: scale(1, 1.3); }
+        .tree-part.bottom { width: 100%; height: 70%; left: 0; top: 30%; }
+        
+        .star {
+            position: absolute;
+            top: -5%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 6vmin;
+            color: #ffd700;
+            text-shadow: 0 0 15px #ffd700;
+            animation: pulse 2s infinite;
+        }
+        
+        .trunk {
+            position: absolute;
+            bottom: -5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15%;
+            height: 10%;
+            background: #5c3c1a;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+            50% { transform: translateX(-50%) scale(1.1); opacity: 0.8; }
+        }
+
+        /* --- 装饰彩灯 --- */
+        .light {
+            position: absolute;
+            width: 1.5vmin;
+            height: 1.5vmin;
+            border-radius: 50%;
+            animation: twinkle 1.5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; box-shadow: 0 0 5px currentColor; }
+            50% { opacity: 0.5; box-shadow: 0 0 2px currentColor; }
+        }
+
+        /* --- 照片装饰球 --- */
+        .ornament {
+            position: absolute;
+            width: 7vmin;
+            height: 7vmin;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 5px black;
+        }
+
+        .ornament:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.7);
+        }
+
+        /* --- 照片放大弹窗 --- */
+        #lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        #lightbox img {
+            max-width: 80%;
+            max-height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 0 30px #000;
+        }
+        
+        .close-btn, .nav-btn {
+            position: absolute;
+            color: #fff;
+            font-size: 3rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .close-btn { top: 20px; right: 30px; }
+        .nav-btn.prev { left: 20px; }
+        .nav-btn.next { right: 20px; }
+        
+        /* --- 音乐控制 --- */
+        #music-control {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. 欢迎页 -->
+    <div id="welcome-screen">
+        <h1>Merry Christmas</h1>
+        <input type="text" id="name-input" placeholder="请输入你的名字">
+        <p id="error-msg">这个惊喜不是给你的哦！</p>
+    </div>
+
+    <!-- 2. 主场景 -->
+    <div id="main-scene">
+        <!-- 雪花容器 -->
+        <div id="snow-container"></div>
+        
+        <!-- 圣诞树 -->
+        <div class="christmas-tree">
+            <div class="star">★</div>
+            <div class="tree-part top"></div>
+            <div class="tree-part middle"></div>
+            <div class="tree-part bottom"></div>
+            <div class="trunk"></div>
+            <!-- 彩灯和照片会由JS动态添加 -->
+        </div>
+
+        <!-- 音乐控制 -->
+        <div id="music-control">▶️</div>
+        <audio id="bg-music" loop>
+            <!-- 替换成你想要的音乐链接，或者下载后放在同目录下 -->
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <!-- 3. 照片放大弹窗 -->
+    <div id="lightbox">
+        <span class="close-btn">&times;</span>
+        <span class="nav-btn prev">&lt;</span>
+        <img id="lightbox-img" src="" alt="memory">
+        <span class="nav-btn next">&gt;</span>
+    </div>
+
+    <script>
+        // --- 1. 自定义区域 ---
+        const FORBIDDEN_NAME = "你的名字"; // 替换成你自己的名字
+        
+        // 准备你的照片！可以是在线链接，也可以是放在同目录下的文件名
+        const photoUrls = [
+            "https://picsum.photos/id/10/200/200", // 示例照片1
+            "https://picsum.photos/id/20/200/200", // 示例照片2
+            "https://picsum.photos/id/30/200/200", // 示例照片3
+            "https://picsum.photos/id/40/200/200", // 示例照片4
+            "https://picsum.photos/id/50/200/200", // 示例照片5
+            "https://picsum.photos/id/60/200/200", // 示例照片6
+            // ... 在这里添加更多照片链接
+        ];
+
+        // --- 2. 欢迎页逻辑 ---
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const nameInput = document.getElementById('name-input');
+        const errorMsg = document.getElementById('error-msg');
+        const mainScene = document.getElementById('main-scene');
+
+        nameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (nameInput.value.trim().toLowerCase() === FORBIDDEN_NAME.toLowerCase()) {
+                    errorMsg.style.visibility = 'visible';
+                } else if (nameInput.value.trim() !== '') {
+                    welcomeScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        welcomeScreen.style.display = 'none';
+                        mainScene.style.visibility = 'visible';
+                        mainScene.style.opacity = '1';
+                        // 场景加载后初始化所有动态效果
+                        init();
+                    }, 1000);
+                }
+            }
+        });
+
+        function init() {
+            // --- 3. 初始化动态效果 ---
+            createSnowflakes();
+            createLights();
+            createOrnaments();
+            
+            // 尝试自动播放音乐
+            const music = document.getElementById('bg-music');
+            music.play().catch(e => console.log("浏览器禁止了自动播放，需要用户交互。"));
+        }
+
+        // --- 4. 动态创建雪花 ---
+        function createSnowflakes() {
+            const snowContainer = document.getElementById('snow-container');
+            for (let i = 0; i < 100; i++) {
+                const snowflake = document.createElement('div');
+                const size = Math.random() * 4 + 1;
+                snowflake.className = 'snowflake';
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                snowflake.style.left = `${Math.random() * 100}vw`;
+                snowflake.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                snowflake.style.animationDelay = `${Math.random() * 5}s`;
+                // 模拟雪花飘落的横向偏移
+                snowflake.style.animationName = `fall${i % 2}`;
+                snowContainer.appendChild(snowflake);
+            }
+        }
+        // 为了雪花飘落更自然，创建两个方向的动画
+        document.head.insertAdjacentHTML("beforeend", `
+            <style>
+                @keyframes fall0 { to { transform: translateY(105vh) translateX(5vw); } }
+                @keyframes fall1 { to { transform: translateY(105vh) translateX(-5vw); } }
+            </style>
+        `);
+        
+        // --- 5. 动态创建彩灯 ---
+        function createLights() {
+            const tree = document.querySelector('.christmas-tree');
+            const lightColors = ['#ff4d4d', '#ffc107', '#4d94ff', '#79ff4d'];
+            for(let i = 0; i < 30; i++) {
+                const light = document.createElement('div');
+                light.className = 'light';
+                light.style.backgroundColor = lightColors[i % lightColors.length];
+                light.style.top = `${Math.random() * 90}%`; // 限制在树干以上
+                light.style.left = `${Math.random() * 100}%`;
+                light.style.animationDelay = `${Math.random() * 1.5}s`;
+                tree.appendChild(light);
+            }
+        }
+        
+        // --- 6. 动态创建照片装饰球 ---
+        const ornamentPositions = [ // 手动定义一些位置，让布局更美观
+            { top: '25%', left: '45%' }, { top: '40%', left: '20%' }, { top: '45%', left: '65%' },
+            { top: '60%', left: '35%' }, { top: '65%', left: '80%' }, { top: '75%', left: '50%' }
+        ];
+
+        function createOrnaments() {
+            const tree = document.querySelector('.christmas-tree');
+            photoUrls.forEach((url, index) => {
+                const ornament = document.createElement('div');
+                ornament.className = 'ornament';
+                ornament.style.backgroundImage = `url(${url})`;
+                
+                // 使用预设位置，如果照片比位置多，则随机放置
+                const pos = ornamentPositions[index] || { top: `${Math.random() * 60 + 20}%`, left: `${Math.random() * 80 + 10}%` };
+                ornament.style.top = pos.top;
+                ornament.style.left = pos.left;
+
+                ornament.dataset.index = index;
+                ornament.addEventListener('click', showLightbox);
+                tree.appendChild(ornament);
+            });
+        }
+        
+        // --- 7. 照片弹窗逻辑 ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const closeBtn = document.querySelector('.close-btn');
+        const prevBtn = document.querySelector('.nav-btn.prev');
+        const nextBtn = document.querySelector('.nav-btn.next');
+        let currentIndex = 0;
+
+        function showLightbox(e) {
+            currentIndex = parseInt(e.target.dataset.index);
+            updateLightboxImage();
+            lightbox.style.display = 'flex';
+        }
+
+        function updateLightboxImage() {
+            lightboxImg.src = photoUrls[currentIndex];
+        }
+
+        closeBtn.addEventListener('click', () => lightbox.style.display = 'none');
+        prevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + photoUrls.length) % photoUrls.length;
+            updateLightboxImage();
+        });
+        nextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % photoUrls.length;
+            updateLightboxImage();
+        });
+        
+        // --- 8. 音乐控制逻辑 ---
+        const musicControl = document.getElementById('music-control');
+        const bgMusic = document.getElementById('bg-music');
+        let isPlaying = false;
+        
+        musicControl.addEventListener('click', () => {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicControl.textContent = '▶️';
+            } else {
+                bgMusic.play();
+                musicControl.textContent = '⏸️';
+            }
+            isPlaying = !isPlaying;
+        });
+        
+        bgMusic.onplay = () => { isPlaying = true; musicControl.textContent = '⏸️'; };
+        bgMusic.onpause = () => { isPlaying = false; musicControl.textContent = '▶️'; };
+
+    </script>
+</body>
+</html>
